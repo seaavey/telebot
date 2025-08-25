@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"errors"
 	"net/url"
 	"regexp"
 	"telebot/config"
@@ -25,7 +26,7 @@ func IsURL(s string) bool {
 func GetURL(text string) (string, error) {
 	match := URLRegex.FindString(text)
 	if match == "" {
-		return "", nil
+		return "", errors.New("no valid URL found in text")
 	}
 
 	u, err := url.ParseRequestURI(match)
@@ -35,9 +36,10 @@ func GetURL(text string) (string, error) {
 
 	return u.String(), nil
 }
+
 func Coalesce(a, b string) string {
-    if a != "" {
-        return a
-    }
-    return b
+	if a != "" {
+		return a
+	}
+	return b
 }
