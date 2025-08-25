@@ -43,6 +43,10 @@ A Telegram bot built with Go that allows users to download media content from po
 - **Enhanced HTTP Client**: Added 30-second timeouts to all HTTP requests to prevent hanging
 - **Better Error Handling**: Improved error messages with context for easier debugging
 - **URL Validation**: Fixed URL extraction to properly report when no valid URL is found
+- **MediaFire Feature Removal**: Removed unstable MediaFire feature to improve overall reliability
+
+## Error Handling
+The bot implements comprehensive error handling for all supported platforms. When an error occurs, users will receive a descriptive message explaining the issue rather than a generic failure notification.
 
 ## Dependencies
 - [go-telegram-bot-api](https://github.com/go-telegram-bot-api/telegram-bot-api)

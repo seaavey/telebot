@@ -64,6 +64,7 @@ func (handler *MessageHandler) processURL(msg *utils.Message) {
 	url, err := utils.GetURL(msg.Text)
 	if err != nil {
 		log.Printf("Error extracting URL: %v", err)
+		msg.SendText("❌ Sorry, I couldn't find a valid URL in your message. Please make sure you're sending a direct link from TikTok, Instagram, or Pinterest.")
 		return
 	}
 
@@ -73,6 +74,8 @@ func (handler *MessageHandler) processURL(msg *utils.Message) {
 		handler.processInstagramURL(msg, url)
 	} else if handler.mediaService.IsPinterestURL(url) {
 		handler.processPinterestURL(msg, url)
+	} else {
+		msg.SendText("❌ Sorry, I don't support that platform yet. I can process links from TikTok, Instagram, and Pinterest.")
 	}
 }
 
