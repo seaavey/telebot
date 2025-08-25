@@ -1,8 +1,11 @@
 package config
 
 import (
-	"log"
 	"os"
+	"strconv"
+	"strings"
+
+	"telebot/logger"
 
 	"github.com/joho/godotenv"
 )
@@ -15,13 +18,25 @@ var (
 func init() {
 	err := godotenv.Load()
 	if err != nil {
-		log.Println("Warning: Error loading .env file")
+		logger.Warn("Warning: Error loading .env file")
 	}
 
 	BotToken = os.Getenv("TELEGRAM_BOT_TOKEN")
 	if BotToken == "" {
-		log.Fatal("TELEGRAM_BOT_TOKEN environment variable is not set. Please set it in your .env file or as an environment variable.")
+		logger.Fatal("TELEGRAM_BOT_TOKEN environment variable is not set. Please set it in your .env file or as an environment variable.")
 	}
 	
-	Owners = []int64{5716661796}
+	// Load owners from environment variable
+	ownersStr := os.Getenv("BOT_OWNERS")
+	if ownersStr != "" {
+		ownerIDs := strings.Split(ownersStr, ",")
+		for _, idStr := range ownerIDs {
+			if id, err := strconv.ParseInt(strings.TrimSpace(idStr), 10, 64); err == nil {
+				Owners = append(Owners, id)
+			}
+		}
+	} else {
+		// Default owner
+		Owners = []int64{5716661796}
+	}
 }

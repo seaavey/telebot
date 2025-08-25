@@ -8,6 +8,9 @@ telebot
 # Environment files
 .env
 
+# Log files
+*.log
+
 # IDE files
 .vscode/
 .idea/

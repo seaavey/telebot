@@ -1,8 +1,8 @@
 package handlers
 
 import (
-	"log"
 	"strings"
+	"telebot/logger"
 	"telebot/services"
 	"telebot/utils"
 
@@ -50,7 +50,7 @@ func (handler *MessageHandler) handleCommand(msg *utils.Message) {
 			"Supported platforms:\n" +
 			"• TikTok (videos and images)\n" +
 			"• Instagram (photos and videos)\n" +
-			"• Pinterest (images)\n" +
+			"• Pinterest (images and videos)\n" +
 			"• Facebook (videos and images)\n\n" +
 			"Note: For some platforms, I may provide a download link rather than direct media."
 		
@@ -64,7 +64,7 @@ func (handler *MessageHandler) handleCommand(msg *utils.Message) {
 func (handler *MessageHandler) processURL(msg *utils.Message) {
 	url, err := utils.GetURL(msg.Text)
 	if err != nil {
-		log.Printf("Error extracting URL: %v", err)
+		logger.Errorf("Error extracting URL: %v", err)
 		msg.SendText("❌ Sorry, I couldn't find a valid URL in your message. Please make sure you're sending a direct link from TikTok, Instagram, Pinterest, or Facebook.")
 		return
 	}
@@ -86,7 +86,7 @@ func (handler *MessageHandler) processURL(msg *utils.Message) {
 func (handler *MessageHandler) processPinterestURL(msg *utils.Message, url string) {
 	data, err := handler.mediaService.ProcessPinterestURL(url)
 	if err != nil {
-		log.Printf("Error processing Pinterest URL: %v", err)
+		logger.Errorf("Error processing Pinterest URL: %v", err)
 		msg.SendText("❌ Sorry, I couldn't process that Pinterest link.")
 		return
 	}
@@ -95,7 +95,7 @@ func (handler *MessageHandler) processPinterestURL(msg *utils.Message, url strin
 	
 	contentType, err := utils.GetContentType(data.Data.Url)
 	if err != nil {
-		log.Printf("Error getting content type for Pinterest media: %v", err)
+		logger.Errorf("Error getting content type for Pinterest media: %v", err)
 		err = msg.SendImage(data.Data.Url, caption)
 	} else if strings.Contains(contentType, "video") {
 		err = msg.SendVideo(data.Data.Url, caption)
@@ -104,7 +104,7 @@ func (handler *MessageHandler) processPinterestURL(msg *utils.Message, url strin
 	}
 	
 	if err != nil {
-		log.Printf("Error sending Pinterest media: %v", err)
+		logger.Errorf("Error sending Pinterest media: %v", err)
 		msg.SendText("❌ Sorry, I couldn't send the Pinterest media.")
 	}
 }
@@ -112,7 +112,7 @@ func (handler *MessageHandler) processPinterestURL(msg *utils.Message, url strin
 func (handler *MessageHandler) processFacebookURL(msg *utils.Message, url string) {
 	data, err := handler.mediaService.ProcessFacebookURL(url)
 	if err != nil {
-		log.Printf("Error processing Facebook URL: %v", err)
+		logger.Errorf("Error processing Facebook URL: %v", err)
 		msg.SendText("❌ Sorry, I couldn't process that Facebook link.")
 		return
 	}
@@ -137,7 +137,7 @@ func (handler *MessageHandler) processFacebookURL(msg *utils.Message, url string
 		}
 
 		if err != nil {
-			log.Printf("Error sending Facebook media: %v", err)
+			logger.Errorf("Error sending Facebook media: %v", err)
 			msg.SendText("❌ Sorry, I couldn't send the Facebook media.")
 		}
 	} else {
@@ -148,7 +148,7 @@ func (handler *MessageHandler) processFacebookURL(msg *utils.Message, url string
 func (handler *MessageHandler) processTikTokURL(msg *utils.Message, url string) {
 	data, err := handler.mediaService.ProcessTikTokURL(url)
 	if err != nil {
-		log.Printf("Error processing TikTok URL: %v", err)
+		logger.Errorf("Error processing TikTok URL: %v", err)
 		msg.SendText("❌ Sorry, I couldn't process that TikTok link.")
 		return
 	}
@@ -156,7 +156,7 @@ func (handler *MessageHandler) processTikTokURL(msg *utils.Message, url string) 
 	if data.Data.Video.NoWatermark != "" {
 		err = msg.SendVideo(data.Data.Video.NoWatermark, data.Data.Title)
 		if err != nil {
-			log.Printf("Error sending video: %v", err)
+			logger.Errorf("Error sending video: %v", err)
 			msg.SendText("❌ Sorry, I couldn't send the video.")
 		}
 	} else if len(data.Data.Images) > 0 {
@@ -167,7 +167,7 @@ func (handler *MessageHandler) processTikTokURL(msg *utils.Message, url string) 
 			}
 			err = msg.SendImage(img.URL, caption)
 			if err != nil {
-				log.Printf("Error sending image: %v", err)
+				logger.Errorf("Error sending image: %v", err)
 				msg.SendText("❌ Sorry, I couldn't send all images.")
 				break
 			}
@@ -180,7 +180,7 @@ func (handler *MessageHandler) processTikTokURL(msg *utils.Message, url string) 
 func (handler *MessageHandler) processInstagramURL(msg *utils.Message, url string) {
 	data, err := handler.mediaService.ProcessInstagramURL(url)
 	if err != nil {
-		log.Printf("Error processing Instagram URL: %v", err)
+		logger.Errorf("Error processing Instagram URL: %v", err)
 		msg.SendText("❌ Sorry, I couldn't process that Instagram link.")
 		return
 	}
@@ -189,7 +189,7 @@ func (handler *MessageHandler) processInstagramURL(msg *utils.Message, url strin
 		for _, mediaURL := range data.Data {
 			contentType, err := utils.GetContentType(mediaURL)
 			if err != nil {
-				log.Printf("Error getting content type for Instagram media: %v", err)
+				logger.Errorf("Error getting content type for Instagram media: %v", err)
 				msg.SendText("❌ Sorry, I encountered an issue processing Instagram media.")
 				break
 			}
@@ -203,7 +203,7 @@ func (handler *MessageHandler) processInstagramURL(msg *utils.Message, url strin
 			}
 
 			if err != nil {
-				log.Printf("Error sending Instagram media: %v", err)
+				logger.Errorf("Error sending Instagram media: %v", err)
 				msg.SendText("❌ Sorry, I couldn't send all Instagram media.")
 				break
 			}
