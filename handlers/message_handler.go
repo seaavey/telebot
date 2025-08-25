@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"fmt"
 	"log"
 	"strings"
 	"telebot/services"
@@ -51,9 +50,8 @@ func (handler *MessageHandler) handleCommand(msg *utils.Message) {
 			"Supported platforms:\n" +
 			"• TikTok (videos and images)\n" +
 			"• Instagram (photos and videos)\n" +
-			"• Pinterest (images)\n" +
-			"• MediaFire (files and documents)\n\n" +
-			"Note: For MediaFire, I'll provide a download link since direct downloading is not possible due to their protection."
+			"• Pinterest (images)\n\n" +
+			"Note: For some platforms, I may provide a download link rather than direct media."
 		
 		msg.SendText(welcomeText)
 		return
@@ -73,24 +71,9 @@ func (handler *MessageHandler) processURL(msg *utils.Message) {
 		handler.processTikTokURL(msg, url)
 	} else if handler.mediaService.IsInstagramURL(url) {
 		handler.processInstagramURL(msg, url)
-	} else if handler.mediaService.IsMediaFireURL(url) {
-		handler.processMediaFireURL(msg, url)
 	} else if handler.mediaService.IsPinterestURL(url) {
 		handler.processPinterestURL(msg, url)
 	}
-}
-
-func (handler *MessageHandler) processMediaFireURL(msg *utils.Message, url string) {
-	data, err := handler.mediaService.ProcessMediaFireURL(url)
-	if err != nil {
-		log.Printf("Error processing MediaFire URL: %v", err)
-		msg.SendText("❌ Sorry, I couldn't process that MediaFire link.")
-		return
-	}
-
-	caption := fmt.Sprintf("📁 %s\n\n🔗 Download Link:", data.Data.Filename)
-	
-	msg.SendTextWithButton(caption, tgbotapi.NewInlineKeyboardButtonURL("📥 Download File", data.Data.Dl))
 }
 
 func (handler *MessageHandler) processPinterestURL(msg *utils.Message, url string) {
@@ -101,16 +84,16 @@ func (handler *MessageHandler) processPinterestURL(msg *utils.Message, url strin
 		return
 	}
 
-	caption := fmt.Sprintf("📌 %s\n\n🔗 Source: %s", data.Data.Title, data.Data.Url)
+	caption := data.Data.Title
 	
-	contentType, err := utils.GetContentType(data.Data.Thumbnail)
+	contentType, err := utils.GetContentType(data.Data.Url)
 	if err != nil {
 		log.Printf("Error getting content type for Pinterest media: %v", err)
-		err = msg.SendImage(data.Data.Thumbnail, caption)
+		err = msg.SendImage(data.Data.Url, caption)
 	} else if strings.Contains(contentType, "video") {
-		err = msg.SendVideo(data.Data.Thumbnail, caption)
+		err = msg.SendVideo(data.Data.Url, caption)
 	} else {
-		err = msg.SendImage(data.Data.Thumbnail, caption)
+		err = msg.SendImage(data.Data.Url, caption)
 	}
 	
 	if err != nil {

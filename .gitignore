@@ -17,3 +17,6 @@ telebot
 # OS generated files
 .DS_Store
 Thumbs.db
+
+## Folder For Testing
+test
