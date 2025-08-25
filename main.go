@@ -4,6 +4,7 @@ import (
 	"log"
 	"telebot/config"
 	"telebot/handlers"
+	"telebot/utils" // Tambahkan import untuk utils
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
@@ -14,7 +15,13 @@ func main() {
 		log.Fatalf("error %s", err)
 	}
 
-	bot.Debug = true
+	bot.Debug = utils.GetEnvAsBool("BOT_DEBUG", false)
+
+	if bot.Debug {
+		log.Println("Debug mode is ENABLED")
+	} else {
+		log.Println("Debug mode is DISABLED")
+	}
 
 	log.Printf("Authorized on account %s", bot.Self.UserName)
 

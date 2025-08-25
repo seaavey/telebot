@@ -3,7 +3,9 @@ package utils
 import (
 	"errors"
 	"net/url"
+	"os"
 	"regexp"
+	"strings"
 	"telebot/config"
 )
 
@@ -42,4 +44,17 @@ func Coalesce(a, b string) string {
 		return a
 	}
 	return b
+}
+
+func GetEnvAsBool(name string, defaultValue bool) bool {
+	valStr := os.Getenv(name)
+	if valStr == "" {
+		return defaultValue
+	}
+	valStr = strings.ToLower(valStr)
+
+	if valStr == "true" || valStr == "1" || valStr == "on" || valStr == "enabled" {
+		return true
+	}
+	return false
 }

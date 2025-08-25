@@ -11,6 +11,7 @@ const (
 	TikTokAPIURL    = "https://api.seaavey.my.id/api/downloader/tiktok?url="
 	InstagramAPIURL = "https://api.seaavey.my.id/api/downloader/instagram?url="
 	PinterestAPIURL = "https://api.seaavey.my.id/api/downloader/pinterest?url="
+	FacebookAPIURL  = "https://api.siputzx.my.id/api/d/facebook?url="
 )
 
 type MediaService struct{}
@@ -61,6 +62,20 @@ func (s *MediaService) ProcessPinterestURL(url string) (*types.PinterestResponse
 	return &data, nil
 }
 
+func (s *MediaService) ProcessFacebookURL(url string) (*types.FacebookResponse, error) {
+	var data types.FacebookResponse
+	err := utils.FetchJSON(FacebookAPIURL+url, &data)
+	if err != nil {
+		return nil, fmt.Errorf("failed to fetch Facebook data: %w", err)
+	}
+
+	if !data.Status {
+		return nil, fmt.Errorf("API returned status false")
+	}
+
+	return &data, nil
+}
+
 func (s *MediaService) IsTikTokURL(url string) bool {
 	return strings.Contains(url, "tiktok.com")
 }
@@ -71,4 +86,8 @@ func (s *MediaService) IsInstagramURL(url string) bool {
 
 func (s *MediaService) IsPinterestURL(url string) bool {
 	return strings.Contains(url, "pinterest.com") || strings.Contains(url, "pin.it")
+}
+
+func (s *MediaService) IsFacebookURL(url string) bool {
+	return strings.Contains(url, "facebook.com") || strings.Contains(url, "fb.watch") || strings.Contains(url, "fb.com")
 }

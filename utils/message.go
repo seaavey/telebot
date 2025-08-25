@@ -99,6 +99,38 @@ func (msg *Message) SendVideo(videoURL string, caption ...string) error {
 }
 
 
+func (msg *Message) SendAudio(audioURL string, caption ...string) error {
+	if msg.client == nil {
+		return nil
+	}
+
+	// Use URL directly instead of FileID for external audio
+	message := tgbotapi.NewAudio(msg.Chat.ID, tgbotapi.FileURL(audioURL))
+	
+	if len(caption) > 0 {
+		message.Caption = caption[0]
+	}
+
+	_, err := msg.client.Send(message)
+	return err
+}
+
+func (msg *Message) SendDocument(documentURL string, caption ...string) error {
+	if msg.client == nil {
+		return nil
+	}
+
+	// Use URL directly instead of FileID for external documents
+	message := tgbotapi.NewDocument(msg.Chat.ID, tgbotapi.FileURL(documentURL))
+	
+	if len(caption) > 0 {
+		message.Caption = caption[0]
+	}
+
+	_, err := msg.client.Send(message)
+	return err
+}
+
 func (msg *Message) SendTextWithButton(text string, buttons ...tgbotapi.InlineKeyboardButton) error {
 	if msg.client == nil {
 		return nil

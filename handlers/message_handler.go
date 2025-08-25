@@ -50,7 +50,8 @@ func (handler *MessageHandler) handleCommand(msg *utils.Message) {
 			"Supported platforms:\n" +
 			"• TikTok (videos and images)\n" +
 			"• Instagram (photos and videos)\n" +
-			"• Pinterest (images)\n\n" +
+			"• Pinterest (images)\n" +
+			"• Facebook (videos and images)\n\n" +
 			"Note: For some platforms, I may provide a download link rather than direct media."
 		
 		msg.SendText(welcomeText)
@@ -64,18 +65,21 @@ func (handler *MessageHandler) processURL(msg *utils.Message) {
 	url, err := utils.GetURL(msg.Text)
 	if err != nil {
 		log.Printf("Error extracting URL: %v", err)
-		msg.SendText("❌ Sorry, I couldn't find a valid URL in your message. Please make sure you're sending a direct link from TikTok, Instagram, or Pinterest.")
+		msg.SendText("❌ Sorry, I couldn't find a valid URL in your message. Please make sure you're sending a direct link from TikTok, Instagram, Pinterest, or Facebook.")
 		return
 	}
 
-	if handler.mediaService.IsTikTokURL(url) {
+	switch {
+	case handler.mediaService.IsTikTokURL(url):
 		handler.processTikTokURL(msg, url)
-	} else if handler.mediaService.IsInstagramURL(url) {
+	case handler.mediaService.IsInstagramURL(url):
 		handler.processInstagramURL(msg, url)
-	} else if handler.mediaService.IsPinterestURL(url) {
+	case handler.mediaService.IsPinterestURL(url):
 		handler.processPinterestURL(msg, url)
-	} else {
-		msg.SendText("❌ Sorry, I don't support that platform yet. I can process links from TikTok, Instagram, and Pinterest.")
+	case handler.mediaService.IsFacebookURL(url):
+		handler.processFacebookURL(msg, url)
+	default:
+		msg.SendText("❌ Sorry, I don't support that platform yet. I can process links from TikTok, Instagram, Pinterest, and Facebook.")
 	}
 }
 
@@ -104,6 +108,43 @@ func (handler *MessageHandler) processPinterestURL(msg *utils.Message, url strin
 		msg.SendText("❌ Sorry, I couldn't send the Pinterest media.")
 	}
 }
+
+func (handler *MessageHandler) processFacebookURL(msg *utils.Message, url string) {
+	data, err := handler.mediaService.ProcessFacebookURL(url)
+	if err != nil {
+		log.Printf("Error processing Facebook URL: %v", err)
+		msg.SendText("❌ Sorry, I couldn't process that Facebook link.")
+		return
+	}
+
+	// Use the first media item from the response
+	if len(data.Data.Data) > 0 {
+		media := data.Data.Data[0]
+		mediaURL := media.URL
+		caption := data.Data.Title
+		
+		var err error
+		switch {
+		case media.Resolution == "Audio":
+			err = msg.SendAudio(mediaURL, caption)
+		case media.Format == "mp4":
+			err = msg.SendVideo(mediaURL, caption)
+		case media.Format == "jpg":
+			err = msg.SendImage(mediaURL, caption)
+		default:
+			// Fallback to document for other formats
+			err = msg.SendDocument(mediaURL, caption)
+		}
+
+		if err != nil {
+			log.Printf("Error sending Facebook media: %v", err)
+			msg.SendText("❌ Sorry, I couldn't send the Facebook media.")
+		}
+	} else {
+		msg.SendText("❌ Sorry, I couldn't find any downloadable media in that Facebook link.")
+	}
+}
+
 func (handler *MessageHandler) processTikTokURL(msg *utils.Message, url string) {
 	data, err := handler.mediaService.ProcessTikTokURL(url)
 	if err != nil {
