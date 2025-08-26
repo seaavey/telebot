@@ -56,7 +56,15 @@ A Telegram bot built with Go that allows users to download media content from po
    ```
    TELEGRAM_BOT_TOKEN=your_actual_bot_token_here
    ```
-4. Build and run the container:
+4. Initialize the project using the init script:
+   ```bash
+   # On Linux/Mac
+   ./init.sh
+   
+   # On Windows
+   init.bat
+   ```
+5. Build and run the container:
    ```
    docker-compose up --build
    ```
@@ -65,6 +73,19 @@ A Telegram bot built with Go that allows users to download media content from po
 For development with hot reloading, you can use Docker with volume mapping:
 ```
 docker-compose up --build
+```
+
+### Updating the Bot
+To update the bot with the latest changes from the repository, use the update script:
+```bash
+# On Linux/Mac (with default container name)
+./update.sh
+
+# On Linux/Mac (with custom container name)
+./update.sh my-custom-container-name
+
+# On Windows
+update.sh
 ```
 
 ## Configuration
