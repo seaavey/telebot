@@ -34,6 +34,8 @@ A Telegram bot built with Go that allows users to download media content from po
 - Environment-based configuration for log levels and debug mode
 
 ## Setup
+
+### Traditional Setup
 1. Clone the repository
 2. Create a `.env` file with your Telegram bot token:
    ```
@@ -43,6 +45,27 @@ A Telegram bot built with Go that allows users to download media content from po
    ```
 3. Run `go mod tidy` to install dependencies
 4. Start the bot with `go run main.go`
+
+### Docker Setup
+1. Clone the repository
+2. Copy `.env.example` to `.env` and fill in your Telegram bot token:
+   ```
+   cp .env.example .env
+   ```
+3. Edit the `.env` file and add your Telegram bot token:
+   ```
+   TELEGRAM_BOT_TOKEN=your_actual_bot_token_here
+   ```
+4. Build and run the container:
+   ```
+   docker-compose up --build
+   ```
+
+### Docker Development
+For development with hot reloading, you can use Docker with volume mapping:
+```
+docker-compose up --build
+```
 
 ## Configuration
 - `TELEGRAM_BOT_TOKEN`: Your Telegram bot token (required)

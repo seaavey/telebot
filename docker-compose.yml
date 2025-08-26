@@ -1,0 +1,20 @@
+version: '3.8'
+
+services:
+  telebot:
+    build: .
+    container_name: telebot
+    restart: unless-stopped
+    environment:
+      - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
+      - BOT_DEBUG=${BOT_DEBUG:-false}
+      - LOG_LEVEL=${LOG_LEVEL:-INFO}
+      - BOT_OWNERS=${BOT_OWNERS}
+    volumes:
+      - .env:/app/.env:ro
+    networks:
+      - telebot-network
+
+networks:
+  telebot-network:
+    driver: bridge
